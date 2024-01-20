@@ -1,13 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const User = require("./models/User");
-
-MONGOBD_URL =
-  "mongodb+srv://zuhriddin-tech:gGujMjlS3jhRPdmz@cluster0.wzap21l.mongodb.net/register_users?retryWrites=true&w=majority";
+const bcrypt = require("bcryptjs");
 const app = express();
 
-// gGujMjlS3jhRPdmz
+const User = require("./models/User");
+
+const bcryptSalt = bcrypt.genSaltSync(10);
+MONGOBD_URL =
+  "mongodb+srv://zuhriddin-tech:gGujMjlS3jhRPdmz@cluster0.wzap21l.mongodb.net/airbnb?retryWrites=true&w=majority";
 
 app.use(express.json());
 
@@ -26,10 +27,18 @@ app.get("/test", (req, res, next) => {
 });
 
 //endpoint for register page sign up
-app.post("/register", (req, res, next) => {
+app.post("/register", async (req, res, next) => {
   const { name, email, password } = req.body;
-  User.create({ name, email, password });
-  res.json({ name, email, password });
+  try {
+    const userDoc = await User.create({
+      name,
+      email,
+      password: bcrypt.hashSync(password, bcryptSalt),
+    });
+    res.json(userDoc);
+  } catch (e) {
+    res.status(422).json(e);
+  }
 });
 
 app.listen(3000);
