@@ -2,11 +2,13 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const app = express();
 
 const User = require("./models/User");
 
 const bcryptSalt = bcrypt.genSaltSync(10);
+const jwtSecret = "afaerehrkhkhr2hekhwkrhekhrkh3k2h";
 MONGOBD_URL =
   "mongodb+srv://zuhriddin-tech:gGujMjlS3jhRPdmz@cluster0.wzap21l.mongodb.net/airbnb?retryWrites=true&w=majority";
 
@@ -38,6 +40,31 @@ app.post("/register", async (req, res, next) => {
     res.json(userDoc);
   } catch (e) {
     res.status(422).json(e);
+  }
+});
+
+//endpoint for login page sign in
+app.post("/login", async (req, res, next) => {
+  const { email, password } = req.body;
+
+  const userDoc = await User.findOne({ email: email });
+  if (userDoc) {
+    const passwordOk = bcrypt.compareSync(password, userDoc.password);
+    if (passwordOk) {
+      jwt.sign(
+        { email: userDoc.email, id: userDoc._id },
+        jwtSecret,
+        {},
+        (err, token) => {
+          if (err) throw err;
+          res.cookie("token", token).json(userDoc);
+        }
+      );
+    } else {
+      res.status(422).json("password check fail 404!");
+    }
+  } else {
+    res.json("User not found!");
   }
 });
 
