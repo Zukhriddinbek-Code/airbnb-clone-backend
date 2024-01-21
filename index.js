@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const app = express();
 
 const User = require("./models/User");
@@ -13,6 +14,7 @@ MONGOBD_URL =
   "mongodb+srv://zuhriddin-tech:gGujMjlS3jhRPdmz@cluster0.wzap21l.mongodb.net/airbnb?retryWrites=true&w=majority";
 
 app.use(express.json());
+app.use(cookieParser());
 
 //connection between front and backend middlepoints
 app.use(
@@ -66,6 +68,12 @@ app.post("/login", async (req, res, next) => {
   } else {
     res.json("User not found!");
   }
+});
+
+//endpoint for
+app.get("/profile", async (req, res, next) => {
+  const { token } = req.cookies;
+  res.json({ token });
 });
 
 app.listen(3000);
